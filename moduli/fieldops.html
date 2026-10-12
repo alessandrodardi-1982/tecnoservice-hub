@@ -881,6 +881,33 @@ function defaultData() {
 
 const state = { user: null, page: 'dashboard', weekOffset: 0, activeChatTechId: null, data: loadData() };
 
+// ── IMPORT TICKET DA CHAT ASSISTENZA (ts_tickets shared localStorage) ──
+(function loadChatTickets() {
+  try {
+    const chatTickets = JSON.parse(localStorage.getItem('ts_tickets') || '[]');
+    if (!Array.isArray(chatTickets) || !chatTickets.length) return;
+    const existingIds = new Set(state.data.tickets.map(t => t.id));
+    chatTickets.forEach(ct => {
+      if (existingIds.has(ct.id)) return;
+      const parts = [];
+      if (ct.macchinario) parts.push(ct.macchinario);
+      if (ct.sintomo && ct.sintomo !== ct.macchinario) parts.push(ct.sintomo);
+      if (ct.urgenza)     parts.push('Urgenza: ' + ct.urgenza);
+      if (ct.da_quando)   parts.push('Da: ' + ct.da_quando);
+      state.data.tickets.push({
+        id: ct.id,
+        techId: null,
+        displayName: '📋 Chat Clienti',
+        text: ('[Chat] ' + parts.join(' — ')).slice(0, 250),
+        date: (ct.ts || new Date().toISOString()).slice(0, 10),
+        status: 'open',
+        adminNote: '',
+        source: 'chat'
+      });
+    });
+  } catch(e) {}
+})();
+
 // Garantisce che chats esista (per dati pre-chat salvati in localStorage)
 if (!state.data.chats) state.data.chats = [];
 
@@ -1107,7 +1134,7 @@ function renderDashboard() {
                     <div class="ticket-dot"></div>
                     <div style="flex:1;min-width:0">
                       <div style="font-size:13px;font-weight:500;color:var(--fg)">${t.text.length > 70 ? t.text.slice(0,70)+'…' : t.text}</div>
-                      <div class="ticket-meta">${tech ? tech.name : t.techId} · ${fmt(t.date)}</div>
+                      <div class="ticket-meta">${tech ? tech.name : (t.displayName||t.techId||'—')} · ${fmt(t.date)}</div>
                     </div>
                   </div>`;
                 }).join('')
@@ -1547,7 +1574,7 @@ function renderTickets() {
               <div style="flex:1;min-width:0">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
                   ${ticketBadge(t.status)}
-                  <span style="font-size:11px;color:var(--fg-3)">${tech?.name||t.techId} · ${fmt(t.date)}</span>
+                  <span style="font-size:11px;color:var(--fg-3)">${tech?.name||(t.displayName||t.techId||'—')} · ${fmt(t.date)}</span>
                 </div>
                 <div style="font-size:13px;color:var(--fg)">${t.text}</div>
                 ${t.adminNote ? `<div style="margin-top:6px;font-size:12px;color:var(--fg-2);background:var(--surface-2);padding:6px 8px;border-radius:5px"><strong>Risposta:</strong> ${t.adminNote}</div>` : ''}
