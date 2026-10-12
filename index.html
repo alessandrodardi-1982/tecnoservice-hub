@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TecnoService Hub</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    :root {
+      --bg: #F7F8FA;
+      --surface: #FFFFFF;
+      --border: #E2E5EB;
+      --fg: #1A1D23;
+      --fg-2: #4A5060;
+      --fg-3: #8892A4;
+      --accent: #2563EB;
+      --accent-light: #EEF3FE;
+      --ok: #16A34A;
+      --ok-light: #DCFCE7;
+      --warn: #D97706;
+      --warn-light: #FEF3C7;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ─── HEADER ─────────────────────────────────────────── */
+    .hub-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hub-logo {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hub-logo svg { color: white; }
+    .hub-brand { font-size: 16px; font-weight: 700; color: var(--fg); }
+    .hub-brand span { color: var(--accent); }
+    .hub-tagline { font-size: 12px; color: var(--fg-3); margin-left: 4px; }
+
+    /* ─── MAIN ───────────────────────────────────────────── */
+    .hub-main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    .hub-intro {
+      margin-bottom: 32px;
+    }
+    .hub-intro h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--fg);
+      margin-bottom: 6px;
+    }
+    .hub-intro p {
+      font-size: 14px;
+      color: var(--fg-2);
+    }
+
+    /* ─── GRID MODULI ────────────────────────────────────── */
+    .moduli-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .modulo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: box-shadow .15s, border-color .15s;
+      cursor: pointer;
+    }
+    .modulo-card:hover {
+      box-shadow: 0 4px 12px rgba(37,99,235,.1);
+      border-color: var(--accent);
+    }
+    .modulo-card.disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .modulo-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .modulo-icon.blue   { background: var(--accent-light); color: var(--accent); }
+    .modulo-icon.green  { background: var(--ok-light);     color: var(--ok); }
+    .modulo-icon.orange { background: var(--warn-light);   color: var(--warn); }
+    .modulo-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .modulo-desc {
+      font-size: 13px;
+      color: var(--fg-2);
+      line-height: 1.5;
+    }
+    .modulo-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      width: fit-content;
+    }
+    .badge-live   { background: var(--ok-light);   color: var(--ok); }
+    .badge-wip    { background: var(--warn-light);  color: var(--warn); }
+    .badge-soon   { background: var(--border);      color: var(--fg-3); }
+
+    /* ─── FOOTER ─────────────────────────────────────────── */
+    .hub-footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 12px;
+      color: var(--fg-3);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hub-header">
+    <div class="hub-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+      </svg>
+    </div>
+    <div>
+      <div class="hub-brand">Tecno<span>Service</span> Hub</div>
+    </div>
+    <div class="hub-tagline">— Suite operativa integrata</div>
+  </header>
+
+  <main class="hub-main">
+    <div class="hub-intro">
+      <h1>Scegli un modulo</h1>
+      <p>Tutti gli strumenti operativi di TecnoService Industriale Srl in un unico posto.</p>
+    </div>
+
+    <div class="moduli-grid">
+
+      <!-- FIELDOPS -->
+      <a class="modulo-card" href="moduli/fieldops.html">
+        <div class="modulo-icon blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+        <div>
+          <div class="modulo-name">Pianificazione Tecnici</div>
+          <div class="modulo-desc">Gestione agenda, interventi, siti e comunicazione interna tra admin e tecnici.</div>
+        </div>
+        <span class="modulo-badge badge-live">● Live</span>
+      </a>
+
+      <!-- CHAT AI (placeholder) -->
+      <div class="modulo-card disabled">
+        <div class="modulo-icon green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="modulo-name">Chat Assistenza Clienti</div>
+          <div class="modulo-desc">Raccolta richieste di assistenza tecnica via chat AI. Le richieste arrivano direttamente in pianificazione.</div>
+        </div>
+        <span class="modulo-badge badge-soon">In arrivo</span>
+      </div>
+
+      <!-- RAPPORTINO (placeholder) -->
+      <div class="modulo-card disabled">
+        <div class="modulo-icon orange">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+          </svg>
+        </div>
+        <div>
+          <div class="modulo-name">Rapportino Intervento</div>
+          <div class="modulo-desc">Compilazione rapportino sul campo con firma digitale e generazione automatica dei report.</div>
+        </div>
+        <span class="modulo-badge badge-soon">In arrivo</span>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="hub-footer">
+    TecnoService Hub · Demo operativa · Alessandro Dardi 2026
+  </footer>
+
+</body>
+</html>

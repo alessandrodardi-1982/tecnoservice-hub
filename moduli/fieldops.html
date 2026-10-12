@@ -1,0 +1,1999 @@
+<!– FieldOps — gestione tecnici e agenda interventi -->
+<title>FieldOps</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+/* ─── TOKEN SYSTEM ───────────────────────────────────────────────
+   Layout: sidebar fissa + area contenuto scrollabile
+   Colori: blu industriale come accent, grigi neutri leggermente caldi
+   Type: Inter (UI) + IBM Plex Mono (codici/badge)
+──────────────────────────────────────────────────────────────── */
+:root {
+  --bg: #F7F8FA;
+  --surface: #FFFFFF;
+  --surface-2: #F0F2F5;
+  --border: #E2E5EB;
+  --border-strong: #C8CDD6;
+  --fg: #1A1D23;
+  --fg-2: #4A5060;
+  --fg-3: #8892A4;
+  --accent: #2563EB;
+  --accent-light: #EEF3FE;
+  --accent-fg: #FFFFFF;
+  --ok: #16A34A;
+  --ok-light: #DCFCE7;
+  --warn: #D97706;
+  --warn-light: #FEF3C7;
+  --danger: #DC2626;
+  --danger-light: #FEE2E2;
+  --sidebar-w: 220px;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1117;
+    --surface: #1A1D26;
+    --surface-2: #22263A;
+    --border: #2A2F42;
+    --border-strong: #3D4460;
+    --fg: #E8EAF0;
+    --fg-2: #9BA3B8;
+    --fg-3: #5A6380;
+    --accent: #3B82F6;
+    --accent-light: #1E2A4A;
+    --accent-fg: #FFFFFF;
+    --ok: #22C55E;
+    --ok-light: #0D2818;
+    --warn: #F59E0B;
+    --warn-light: #2A1E06;
+    --danger: #EF4444;
+    --danger-light: #2A0A0A;
+    --shadow: 0 1px 3px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1117;
+  --surface: #1A1D26;
+  --surface-2: #22263A;
+  --border: #2A2F42;
+  --border-strong: #3D4460;
+  --fg: #E8EAF0;
+  --fg-2: #9BA3B8;
+  --fg-3: #5A6380;
+  --accent: #3B82F6;
+  --accent-light: #1E2A4A;
+  --accent-fg: #FFFFFF;
+  --ok: #22C55E;
+  --ok-light: #0D2818;
+  --warn: #F59E0B;
+  --warn-light: #2A1E06;
+  --danger: #EF4444;
+  --danger-light: #2A0A0A;
+  --shadow: 0 1px 3px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 0;
+}
+
+/* ─── LOGIN ─────────────────────────────────────────────────── */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px;
+}
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 40px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.08);
+}
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.login-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-logo-icon svg { color: white; }
+.login-logo-text { font-size: 20px; font-weight: 700; letter-spacing: -.5px; }
+.login-subtitle { color: var(--fg-2); font-size: 13px; margin-bottom: 28px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--fg-2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
+.form-control {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color .15s;
+  outline: none;
+}
+.form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s, background .15s;
+  white-space: nowrap;
+}
+.btn:hover { opacity: .88; }
+.btn:active { opacity: .75; }
+.btn-primary { background: var(--accent); color: var(--accent-fg); width: 100%; margin-top: 8px; padding: 10px 16px; }
+.btn-ghost { background: transparent; color: var(--fg-2); border: 1px solid var(--border); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.login-error { display: none; color: var(--danger); font-size: 13px; margin-top: 10px; padding: 8px 12px; background: var(--danger-light); border-radius: 6px; }
+
+/* ─── LAYOUT APP ──────────────────────────────────────────── */
+#app { display: none; height: 100%; flex-direction: row; }
+#app.active { display: flex; }
+
+/* SIDEBAR */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-logo-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-logo-text { font-size: 15px; font-weight: 700; letter-spacing: -.3px; }
+.sidebar-user {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: white;
+}
+.avatar-admin { background: var(--accent); }
+.avatar-tech1 { background: #7C3AED; }
+.avatar-tech2 { background: #059669; }
+.sidebar-user-info { flex: 1; min-width: 0; }
+.sidebar-user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-user-role { font-size: 11px; color: var(--fg-3); }
+.sidebar-nav { flex: 1; padding: 8px 0; }
+.nav-section-label {
+  padding: 10px 16px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--fg-3);
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  color: var(--fg-2);
+  cursor: pointer;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .12s, color .12s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.nav-item:hover { background: var(--surface-2); color: var(--fg); }
+.nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+.nav-item svg { flex-shrink: 0; }
+.badge-count {
+  margin-left: auto;
+  background: var(--danger);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); }
+
+/* MAIN */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.main-content.chat-mode {
+  overflow: hidden;
+}
+.page-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.page-title { font-size: 18px; font-weight: 700; letter-spacing: -.3px; }
+.page-subtitle { font-size: 12px; color: var(--fg-3); margin-top: 2px; }
+.page-body { padding: 24px; flex: 1; }
+
+/* ─── CARDS & TABLES ──────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-title { font-size: 14px; font-weight: 600; }
+.card-body { padding: 18px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media(max-width: 680px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+}
+.stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--fg-3); margin-bottom: 6px; }
+.stat-value { font-size: 28px; font-weight: 700; line-height: 1; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+.stat-sub { font-size: 12px; color: var(--fg-3); margin-top: 4px; }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--fg-3); padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--fg-2); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface-2); }
+.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); }
+
+/* ─── STATUS BADGES ──────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+  white-space: nowrap;
+}
+.badge-planned { background: var(--accent-light); color: var(--accent); }
+.badge-progress { background: var(--warn-light); color: var(--warn); }
+.badge-done { background: var(--ok-light); color: var(--ok); }
+.badge-open { background: var(--danger-light); color: var(--danger); }
+.badge-resolved { background: var(--ok-light); color: var(--ok); }
+.badge-electric { background: #EEF; color: #3730A3; }
+.badge-hydraulic { background: #E0F2FE; color: #0369A1; }
+.badge-generic { background: var(--surface-2); color: var(--fg-2); }
+
+/* ─── MODAL ──────────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,.2);
+}
+.modal-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title { font-size: 15px; font-weight: 700; }
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-3);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  font-size: 18px;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--fg); background: var(--surface-2); }
+.modal-body { padding: 20px; }
+.modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width:480px){ .form-row { grid-template-columns: 1fr; } }
+.form-group { margin-bottom: 14px; }
+.form-group:last-child { margin-bottom: 0; }
+select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238892A4' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+textarea.form-control { resize: vertical; min-height: 80px; }
+
+/* ─── AGENDA CALENDAR ────────────────────────────────────── */
+.week-nav { display: flex; align-items: center; gap: 12px; }
+.week-label { font-size: 14px; font-weight: 600; min-width: 180px; text-align: center; }
+.week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 16px; }
+@media(max-width:680px){ .week-grid { grid-template-columns: repeat(2, 1fr); } }
+.day-col { min-width: 0; }
+.day-header {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--fg-3);
+  padding: 6px 4px;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  background: var(--surface-2);
+}
+.day-header.today { background: var(--accent); color: white; border-color: var(--accent); }
+.day-body {
+  border: 1px solid var(--border);
+  border-radius: 0 0 6px 6px;
+  min-height: 100px;
+  padding: 6px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.agenda-item {
+  padding: 5px 7px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  background: var(--accent-light);
+  border-left-color: var(--accent);
+  color: var(--accent);
+  transition: opacity .12s;
+  line-height: 1.3;
+}
+.agenda-item.status-progress { background: var(--warn-light); border-left-color: var(--warn); color: var(--warn); }
+.agenda-item.status-done { background: var(--ok-light); border-left-color: var(--ok); color: var(--ok); }
+.agenda-item:hover { opacity: .8; }
+.agenda-time { font-family: 'IBM Plex Mono', monospace; font-size: 10px; opacity: .8; }
+.agenda-site { font-weight: 600; }
+
+/* ─── EMPTY STATES ───────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: var(--fg-3);
+  text-align: center;
+  gap: 10px;
+}
+.empty-state svg { opacity: .35; }
+.empty-state p { font-size: 13px; max-width: 240px; }
+
+/* ─── TOAST ─────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--fg);
+  color: var(--bg);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+/* ─── DETAIL PANEL ───────────────────────────────────────── */
+.detail-row { display: flex; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+.detail-row:last-child { border-bottom: none; }
+.detail-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--fg-3); width: 110px; flex-shrink: 0; padding-top: 2px; }
+.detail-value { font-size: 13px; color: var(--fg); }
+
+/* ─── MOBILE SIDEBAR ─────────────────────────────────────── */
+.hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: var(--fg-2); }
+@media(max-width:640px){
+  .hamburger { display: flex; }
+  .sidebar {
+    position: fixed;
+    left: -240px;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    transition: left .25s;
+  }
+  .sidebar.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,.2); }
+  #app.active { flex-direction: column; }
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .mobile-topbar-title { font-size: 15px; font-weight: 700; }
+  .main-content { height: calc(100vh - 53px); }
+}
+@media(min-width:641px){
+  .mobile-topbar { display: none; }
+}
+
+/* ─── SEGNALAZIONI ───────────────────────────────────────── */
+.ticket-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  box-shadow: var(--shadow);
+}
+.ticket-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.ticket-dot.resolved { background: var(--ok); }
+.ticket-meta { font-size: 11px; color: var(--fg-3); margin-top: 4px; }
+.ticket-actions { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+
+/* ─── CHAT ────────────────────────────────────────────────── */
+.chat-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.chat-list {
+  width: 220px;
+  min-width: 220px;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+}
+.chat-list-header {
+  padding: 14px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--fg-3);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.chat-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background .12s;
+}
+.chat-list-item:hover { background: var(--surface-2); }
+.chat-list-item.active { background: var(--accent-light); }
+.chat-list-item-name { font-size: 13px; font-weight: 600; color: var(--fg); }
+.chat-list-item-sub  { font-size: 11px; color: var(--fg-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.chat-unread {
+  margin-left: auto;
+  background: var(--accent);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  flex-shrink: 0;
+}
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+.chat-window-header {
+  padding: 14px 18px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.chat-window-name { font-size: 14px; font-weight: 700; }
+.chat-window-sub  { font-size: 11px; color: var(--fg-3); }
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.chat-bubble-wrap {
+  display: flex;
+  flex-direction: column;
+  max-width: 72%;
+}
+.chat-bubble-wrap.me { align-self: flex-end; align-items: flex-end; }
+.chat-bubble-wrap.other { align-self: flex-start; align-items: flex-start; }
+.chat-bubble {
+  padding: 9px 13px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.chat-bubble-wrap.me .chat-bubble {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-bottom-right-radius: 4px;
+}
+.chat-bubble-wrap.other .chat-bubble {
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+.chat-meta {
+  font-size: 10px;
+  color: var(--fg-3);
+  margin-top: 3px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.chat-sender { font-size: 11px; font-weight: 600; color: var(--fg-2); margin-bottom: 3px; }
+.chat-input-bar {
+  padding: 12px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.chat-input {
+  flex: 1;
+  padding: 9px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 13px;
+  resize: none;
+  outline: none;
+  max-height: 120px;
+  line-height: 1.4;
+  transition: border-color .15s;
+}
+.chat-input:focus { border-color: var(--accent); }
+.chat-send-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity .15s;
+}
+.chat-send-btn:hover { opacity: .85; }
+.chat-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-3);
+  gap: 10px;
+  text-align: center;
+  padding: 32px;
+}
+.chat-date-sep {
+  text-align: center;
+  font-size: 10px;
+  color: var(--fg-3);
+  font-family: 'IBM Plex Mono', monospace;
+  position: relative;
+  margin: 4px 0;
+}
+.chat-date-sep::before, .chat-date-sep::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 28%;
+  height: 1px;
+  background: var(--border);
+}
+.chat-date-sep::before { left: 0; }
+.chat-date-sep::after  { right: 0; }
+@media(max-width:640px) {
+  .chat-list { width: 100%; min-width: 0; border-right: none; }
+  .chat-list.mobile-hidden { display: none; }
+  .chat-window { position: absolute; inset: 0; z-index: 10; background: var(--bg); }
+  .chat-window.mobile-hidden { display: none; }
+  .chat-layout { position: relative; }
+}
+.chat-back-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  align-items: center;
+  gap: 4px;
+}
+@media(max-width:640px) {
+  .chat-back-btn { display: flex; }
+}
+</style>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 3h-8l-2 4h12z"/><circle cx="12" cy="14" r="2"/></svg>
+      </div>
+      <span class="login-logo-text">FieldOps</span>
+    </div>
+    <p class="login-subtitle">Accedi per gestire tecnici e interventi</p>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="login-user" class="form-control" placeholder="es. admin" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" class="form-control" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()">Accedi</button>
+    <div class="login-error" id="login-error">Credenziali non valide. Riprova.</div>
+    <div style="margin-top:20px;padding:12px;background:var(--surface-2);border-radius:6px;font-size:12px;color:var(--fg-3)">
+      <strong style="color:var(--fg-2)">Accessi demo</strong><br>
+      admin / admin123 &nbsp;·&nbsp; tecnico1 / tech123 &nbsp;·&nbsp; tecnico2 / tech123
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- Mobile top bar -->
+  <div class="mobile-topbar">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="mobile-topbar-title">FieldOps</span>
+  </div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 3h-8l-2 4h12z"/><circle cx="12" cy="14" r="2"/></svg>
+      </div>
+      <span class="sidebar-logo-text">FieldOps</span>
+    </div>
+    <div class="sidebar-user" id="sidebar-user-info"></div>
+    <div class="sidebar-nav" id="sidebar-nav"></div>
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;gap:8px" onclick="doLogout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Esci
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main-content" id="main-content"></div>
+</div>
+
+<!-- MODALI -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Titolo</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ──────────────────────────────────────────────────────────────
+// DATI E STATO
+// ──────────────────────────────────────────────────────────────
+
+const USERS = [
+  { id: 'admin',    name: 'Alessandro Dardi', role: 'admin',   pass: 'admin123', avatarClass: 'avatar-admin', initials: 'AD' },
+  { id: 'tecnico1', name: 'Marco Ferretti',   role: 'tecnico', pass: 'tech123',  avatarClass: 'avatar-tech1', initials: 'MF', spec: 'electric' },
+  { id: 'tecnico2', name: 'Sara Conti',       role: 'tecnico', pass: 'tech123',  avatarClass: 'avatar-tech2', initials: 'SC', spec: 'hydraulic' },
+];
+
+const SPECIALIZATIONS = { electric: 'Elettrico', hydraulic: 'Idraulico', generic: 'Generico' };
+const STATUS_LABELS = { planned: 'Pianificato', progress: 'In corso', done: 'Completato' };
+const TICKET_STATUS = { open: 'Aperta', resolved: 'Risolta' };
+
+function loadData() {
+  try {
+    return JSON.parse(localStorage.getItem('fieldops_data') || 'null') || defaultData();
+  } catch(e) { return defaultData(); }
+}
+
+function saveData() {
+  try { localStorage.setItem('fieldops_data', JSON.stringify(state.data)); } catch(e) {}
+}
+
+function defaultData() {
+  const today = new Date();
+  const fmt = d => d.toISOString().slice(0,10);
+  const d0 = fmt(today);
+  const d1 = fmt(new Date(today.getTime() + 86400000));
+  const d2 = fmt(new Date(today.getTime() + 2*86400000));
+  const d4 = fmt(new Date(today.getTime() + 4*86400000));
+  return {
+    sites: [
+      { id: 's1', name: 'Stabilimento Rossi SpA',   address: 'Via Emilia 45, Bologna',      contact: 'Ing. Rossi' },
+      { id: 's2', name: 'Magazzino Logistica Nord', address: 'Via Po 12, Ferrara',           contact: 'Sig. Bianchi' },
+      { id: 's3', name: 'Officina Meccanica Verdi', address: 'Corso Italia 88, Modena',      contact: 'Sig.ra Verdi' },
+    ],
+    interventions: [
+      { id: 'i1', title: 'Revisione compressore',     siteId: 's1', techId: 'tecnico1', date: d0, time: '08:00', duration: 2, spec: 'electric', status: 'progress', notes: 'Portare manometro di ricambio' },
+      { id: 'i2', title: 'Controllo impianto idrico', siteId: 's2', techId: 'tecnico2', date: d0, time: '10:00', duration: 3, spec: 'hydraulic', status: 'planned',  notes: '' },
+      { id: 'i3', title: 'Manutenzione quadro elettrico', siteId: 's3', techId: 'tecnico1', date: d1, time: '09:00', duration: 1.5, spec: 'electric', status: 'planned', notes: 'Verificare fusibili' },
+      { id: 'i4', title: 'Ispezione tubazioni',       siteId: 's1', techId: 'tecnico2', date: d2, time: '14:00', duration: 2, spec: 'hydraulic', status: 'planned',  notes: '' },
+      { id: 'i5', title: 'Verifica impianto terra',   siteId: 's2', techId: 'tecnico1', date: d4, time: '08:30', duration: 1, spec: 'electric', status: 'planned',   notes: '' },
+    ],
+    tickets: [
+      { id: 't1', techId: 'tecnico1', text: 'Manometro del magazzino risulta difettoso, servono pezzi di ricambio.', date: fmt(today), status: 'open',     adminNote: '' },
+      { id: 't2', techId: 'tecnico2', text: 'Il sito Verdi non ha acqua calda disponibile in loco.', date: fmt(new Date(today.getTime() - 86400000)), status: 'resolved', adminNote: 'Comunicato al cliente, risolto.' },
+    ],
+    chats: [
+      {
+        id: 'admin_tecnico1',
+        messages: [
+          { id: 'cm1', from: 'admin', to: 'tecnico1', text: 'Marco, ricorda di portare il tester ieri mattina.', ts: new Date(today.getTime() - 3600000*26).toISOString(), read: true },
+          { id: 'cm2', from: 'tecnico1', to: 'admin', text: 'Ok, confermato. Lo preparo stasera.', ts: new Date(today.getTime() - 3600000*25).toISOString(), read: true },
+        ]
+      },
+      {
+        id: 'admin_tecnico2',
+        messages: [
+          { id: 'cm3', from: 'tecnico2', to: 'admin', text: 'Al sito Verdi manca un raccordo da 3/4. Posso procedere ugualmente?', ts: new Date(today.getTime() - 3600000*2).toISOString(), read: false },
+        ]
+      }
+    ]
+  };
+}
+
+const state = { user: null, page: 'dashboard', weekOffset: 0, activeChatTechId: null, data: loadData() };
+
+// Garantisce che chats esista (per dati pre-chat salvati in localStorage)
+if (!state.data.chats) state.data.chats = [];
+
+// ──────────────────────────────────────────────────────────────
+// AUTH
+// ──────────────────────────────────────────────────────────────
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const found = USERS.find(x => x.id === u && x.pass === p);
+  if (!found) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  state.user = found;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('active');
+  buildUI();
+  navigate('dashboard');
+}
+
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('login-user').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pass').focus(); });
+
+function doLogout() {
+  state.user = null;
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+// ──────────────────────────────────────────────────────────────
+// UI SHELL
+// ──────────────────────────────────────────────────────────────
+function buildUI() {
+  const u = state.user;
+  // User info sidebar
+  document.getElementById('sidebar-user-info').innerHTML = `
+    <div class="avatar ${u.avatarClass}">${u.initials}</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name">${u.name}</div>
+      <div class="sidebar-user-role">${u.role === 'admin' ? 'Amministratore' : 'Tecnico'}</div>
+    </div>`;
+
+  // Nav items
+  const adminNav = [
+    { id: 'dashboard', icon: iconHome(), label: 'Dashboard' },
+    { id: 'agenda',    icon: iconCal(),  label: 'Agenda Settimana' },
+    { id: 'interventi', icon: iconWrench(), label: 'Interventi' },
+    { id: 'tecnici',   icon: iconUser(), label: 'Tecnici' },
+    { id: 'siti',      icon: iconPin(),  label: 'Siti' },
+    { id: 'tickets',   icon: iconAlert(), label: 'Segnalazioni', badgeTickets: true },
+    { id: 'chat',      icon: iconChat(),  label: 'Chat',          badgeChat: true },
+  ];
+  const techNav = [
+    { id: 'myagenda',  icon: iconCal(),  label: 'La Mia Agenda' },
+    { id: 'myticket',  icon: iconAlert(), label: 'Invia Segnalazione' },
+    { id: 'mychat',    icon: iconChat(),  label: 'Chat Admin',   badgeChat: true },
+  ];
+  const nav = u.role === 'admin' ? adminNav : techNav;
+  const openTickets = state.data.tickets.filter(t => t.status === 'open').length;
+  const unreadAdmin = countUnread('admin');
+  const unreadTech  = u.role === 'tecnico' ? countUnread(u.id) : 0;
+  document.getElementById('sidebar-nav').innerHTML = nav.map(n => {
+    let badge = 0;
+    if (n.badgeTickets && openTickets > 0) badge = openTickets;
+    if (n.badgeChat && u.role === 'admin' && unreadAdmin > 0) badge = unreadAdmin;
+    if (n.badgeChat && u.role === 'tecnico' && unreadTech > 0) badge = unreadTech;
+    const badgeHtml = badge > 0 ? `<span class="badge-count">${badge}</span>` : '';
+    return `<button class="nav-item" id="nav-${n.id}" onclick="navigate('${n.id}')">${n.icon}${n.label}${badgeHtml}</button>`;
+  }).join('');
+}
+
+function navigate(page) {
+  state.page = page;
+  state.agendaFilterTechId = null;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  closeSidebar();
+
+  const content = document.getElementById('main-content');
+  content.classList.remove('chat-mode');
+  const renders = {
+    dashboard: renderDashboard,
+    agenda: renderAgenda,
+    interventi: renderInterventi,
+    tecnici: renderTecnici,
+    siti: renderSiti,
+    tickets: renderTickets,
+    myagenda: renderMyAgenda,
+    myticket: renderMyTicket,
+    chat: renderChat,
+    mychat: renderMyChat,
+  };
+  content.innerHTML = '';
+  if (renders[page]) renders[page]();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+// ──────────────────────────────────────────────────────────────
+// HELPERS
+// ──────────────────────────────────────────────────────────────
+function getUser(id) { return USERS.find(u => u.id === id); }
+function getSite(id) { return state.data.sites.find(s => s.id === id); }
+function getIntervention(id) { return state.data.interventions.find(i => i.id === id); }
+function uid() { return 'x' + Math.random().toString(36).slice(2,10); }
+function fmt(d) { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' }); }
+function fmtShort(d) { return new Date(d + 'T12:00:00').toLocaleDateString('it-IT', { day:'2-digit', month:'short' }); }
+function today() { return new Date().toISOString().slice(0,10); }
+
+function statusBadge(s) {
+  const cls = { planned:'badge-planned', progress:'badge-progress', done:'badge-done' };
+  return `<span class="badge ${cls[s]||''}">${STATUS_LABELS[s]||s}</span>`;
+}
+function specBadge(s) {
+  const cls = { electric:'badge-electric', hydraulic:'badge-hydraulic', generic:'badge-generic' };
+  return `<span class="badge ${cls[s]||'badge-generic'}">${SPECIALIZATIONS[s]||s}</span>`;
+}
+function ticketBadge(s) {
+  return `<span class="badge ${s==='open'?'badge-open':'badge-resolved'}">${TICKET_STATUS[s]||s}</span>`;
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ──────────────────────────────────────────────────────────────
+// MODAL
+// ──────────────────────────────────────────────────────────────
+function openModal(title, body, footer='') {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = body;
+  document.getElementById('modal-footer').innerHTML = footer;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// DASHBOARD
+// ──────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const d = state.data;
+  const todayStr = today();
+  const todayInt = d.interventions.filter(i => i.date === todayStr);
+  const openTickets = d.tickets.filter(t => t.status === 'open');
+  const inProgress = d.interventions.filter(i => i.status === 'progress');
+
+  let recentInt = [...d.interventions].sort((a,b) => b.date.localeCompare(a.date)).slice(0,5);
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-subtitle">${new Date().toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="grid-3" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-label">Interventi oggi</div>
+          <div class="stat-value">${todayInt.length}</div>
+          <div class="stat-sub">${todayInt.filter(i=>i.status==='done').length} completati</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">In corso</div>
+          <div class="stat-value" style="color:var(--warn)">${inProgress.length}</div>
+          <div class="stat-sub">su ${d.interventions.filter(i=>i.status==='planned').length} pianificati</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Segnalazioni aperte</div>
+          <div class="stat-value" style="color:${openTickets.length>0?'var(--danger)':'var(--ok)'}">${openTickets.length}</div>
+          <div class="stat-sub">${d.tickets.filter(t=>t.status==='resolved').length} risolte totali</div>
+        </div>
+      </div>
+      <div class="grid-2" style="gap:20px">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Interventi recenti</span>
+            <button class="btn btn-ghost btn-sm" onclick="navigate('interventi')">Vedi tutti</button>
+          </div>
+          <div class="table-wrap" style="border:none;border-radius:0">
+            <table>
+              <thead><tr><th>Titolo</th><th>Tecnico</th><th>Data</th><th>Stato</th></tr></thead>
+              <tbody>
+                ${recentInt.map(i => {
+                  const tech = getUser(i.techId);
+                  return `<tr style="cursor:pointer" onclick="showIntervention('${i.id}')">
+                    <td style="color:var(--fg);font-weight:500">${i.title}</td>
+                    <td>${tech ? tech.name.split(' ')[0] : '—'}</td>
+                    <td style="font-family:'IBM Plex Mono',monospace;font-size:12px">${fmtShort(i.date)}</td>
+                    <td>${statusBadge(i.status)}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Segnalazioni aperte</span>
+            <button class="btn btn-ghost btn-sm" onclick="navigate('tickets')">Gestisci</button>
+          </div>
+          <div class="card-body" style="padding:0">
+            ${openTickets.length === 0
+              ? `<div class="empty-state">${iconCheck()}<p>Nessuna segnalazione aperta</p></div>`
+              : openTickets.map(t => {
+                  const tech = getUser(t.techId);
+                  return `<div class="ticket-card" style="border-radius:0;box-shadow:none;border:none;border-bottom:1px solid var(--border)">
+                    <div class="ticket-dot"></div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:13px;font-weight:500;color:var(--fg)">${t.text.length > 70 ? t.text.slice(0,70)+'…' : t.text}</div>
+                      <div class="ticket-meta">${tech ? tech.name : t.techId} · ${fmt(t.date)}</div>
+                    </div>
+                  </div>`;
+                }).join('')
+            }
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ──────────────────────────────────────────────────────────────
+// AGENDA (ADMIN - TUTTI I TECNICI)
+// ──────────────────────────────────────────────────────────────
+function getWeekDays(offset) {
+  const now = new Date();
+  const day = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1) + offset * 7);
+  return Array.from({length: 7}, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d.toISOString().slice(0,10);
+  });
+}
+
+function renderAgenda(filterTechId) {
+  state.agendaFilterTechId = filterTechId || null;
+  const days = getWeekDays(state.weekOffset);
+  const todayStr = today();
+  const dayNames = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+  const d = state.data;
+
+  const filterHtml = `
+    <select id="agenda-filter" class="form-control" style="width:auto;min-width:160px" onchange="renderAgenda(this.value||undefined)">
+      <option value="">Tutti i tecnici</option>
+      ${USERS.filter(u=>u.role==='tecnico').map(u => `<option value="${u.id}"${filterTechId===u.id?' selected':''}>${u.name}</option>`).join('')}
+    </select>`;
+
+  const techName = filterTechId ? (USERS.find(u=>u.id===filterTechId)?.name || '') : '';
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        ${filterTechId ? `<button class="btn btn-ghost btn-sm" onclick="navigate('tecnici')" style="padding:4px 8px">← Tecnici</button>` : ''}
+        <div>
+          <div class="page-title">${filterTechId ? `Agenda — ${techName}` : 'Agenda Settimana'}</div>
+          <div class="page-subtitle">${fmtShort(days[0])} – ${fmtShort(days[6])}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        ${filterHtml}
+        <div class="week-nav">
+          <button class="btn btn-ghost btn-sm" onclick="changeWeek(-1)">‹ Prec.</button>
+          <span class="week-label" style="min-width:auto">${state.weekOffset===0?'Questa settimana':state.weekOffset===1?'Prossima settimana':''}</span>
+          <button class="btn btn-ghost btn-sm" onclick="changeWeek(1)">Succ. ›</button>
+        </div>
+        ${filterTechId ? '' : `<button class="btn btn-primary btn-sm" onclick="openNewIntervention()">+ Intervento</button>`}
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="week-grid">
+        ${days.map((dateStr, i) => {
+          const dayInts = d.interventions.filter(inv => {
+            if (inv.date !== dateStr) return false;
+            if (filterTechId && inv.techId !== filterTechId) return false;
+            return true;
+          }).sort((a,b) => a.time.localeCompare(b.time));
+
+          return `<div class="day-col">
+            <div class="day-header${dateStr===todayStr?' today':''}">
+              ${dayNames[i]}<br><span style="font-size:13px;font-weight:400">${new Date(dateStr+'T12:00:00').getDate()}</span>
+            </div>
+            <div class="day-body">
+              ${dayInts.length===0 ? `<div style="color:var(--fg-3);font-size:11px;text-align:center;padding:8px 0">—</div>` :
+                dayInts.map(inv => {
+                  const tech = getUser(inv.techId);
+                  return `<div class="agenda-item status-${inv.status}" onclick="showIntervention('${inv.id}')">
+                    <div class="agenda-time">${inv.time} · ${inv.duration}h</div>
+                    <div class="agenda-site">${getSite(inv.siteId)?.name.split(' ').slice(0,2).join(' ') || '—'}</div>
+                    <div style="font-size:10px;opacity:.8">${filterTechId ? '' : (tech ? tech.name.split(' ')[0] : '')}</div>
+                  </div>`;
+                }).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+}
+
+function changeWeek(dir) {
+  state.weekOffset += dir;
+  renderAgenda(state.agendaFilterTechId);
+}
+
+// ──────────────────────────────────────────────────────────────
+// INTERVENTI
+// ──────────────────────────────────────────────────────────────
+function renderInterventi() {
+  const d = state.data;
+  const sorted = [...d.interventions].sort((a,b) => b.date.localeCompare(a.date) || a.time.localeCompare(b.time));
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">Interventi</div><div class="page-subtitle">${d.interventions.length} totali</div></div>
+      <button class="btn btn-primary" onclick="openNewIntervention()">+ Nuovo intervento</button>
+    </div>
+    <div class="page-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Titolo</th><th>Sito</th><th>Tecnico</th><th>Data</th><th>Ora</th><th>Spec.</th><th>Stato</th><th></th></tr></thead>
+          <tbody>
+            ${sorted.map(i => {
+              const tech = getUser(i.techId);
+              const site = getSite(i.siteId);
+              return `<tr>
+                <td style="color:var(--fg);font-weight:500;cursor:pointer" onclick="showIntervention('${i.id}')">${i.title}</td>
+                <td>${site?.name || '—'}</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div class="avatar ${tech?.avatarClass||''}" style="width:22px;height:22px;font-size:9px">${tech?.initials||'?'}</div>
+                    ${tech?.name.split(' ')[0]||'—'}
+                  </div>
+                </td>
+                <td style="font-family:'IBM Plex Mono',monospace;font-size:12px">${fmt(i.date)}</td>
+                <td style="font-family:'IBM Plex Mono',monospace;font-size:12px">${i.time}</td>
+                <td>${specBadge(i.spec)}</td>
+                <td>${statusBadge(i.status)}</td>
+                <td>
+                  <div style="display:flex;gap:4px">
+                    <button class="btn btn-ghost btn-sm" onclick="openEditIntervention('${i.id}')">Modifica</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="deleteIntervention('${i.id}')">✕</button>
+                  </div>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function showIntervention(id) {
+  const i = getIntervention(id);
+  if (!i) return;
+  const tech = getUser(i.techId);
+  const site = getSite(i.siteId);
+  const canEdit = state.user.role === 'admin' || state.user.id === i.techId;
+  const statusOpts = Object.entries(STATUS_LABELS).map(([k,v]) => `<option value="${k}" ${i.status===k?'selected':''}>${v}</option>`).join('');
+
+  openModal(i.title, `
+    <div class="detail-row"><span class="detail-label">Sito</span><span class="detail-value">${site?.name||'—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Indirizzo</span><span class="detail-value">${site?.address||'—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Tecnico</span><span class="detail-value">${tech?.name||'—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Data</span><span class="detail-value" style="font-family:'IBM Plex Mono',monospace">${fmt(i.date)} ore ${i.time}</span></div>
+    <div class="detail-row"><span class="detail-label">Durata</span><span class="detail-value">${i.duration}h</span></div>
+    <div class="detail-row"><span class="detail-label">Specializzazione</span><span class="detail-value">${specBadge(i.spec)}</span></div>
+    <div class="detail-row"><span class="detail-label">Note</span><span class="detail-value">${i.notes||'—'}</span></div>
+    <div class="detail-row">
+      <span class="detail-label">Stato</span>
+      <span class="detail-value">
+        ${canEdit
+          ? `<select class="form-control" style="width:auto" id="status-select-${id}">${statusOpts}</select>`
+          : statusBadge(i.status)}
+      </span>
+    </div>`,
+    canEdit
+      ? `<button class="btn btn-ghost" onclick="closeModal()">Chiudi</button>
+         <button class="btn btn-primary" onclick="updateStatus('${id}')">Salva stato</button>`
+      : `<button class="btn btn-primary" onclick="closeModal()">Chiudi</button>`
+  );
+}
+
+function updateStatus(id) {
+  const sel = document.getElementById('status-select-' + id);
+  if (!sel) return;
+  const i = getIntervention(id);
+  if (i) {
+    i.status = sel.value;
+    saveData();
+    closeModal();
+    toast('Stato aggiornato');
+    navigate(state.page);
+  }
+}
+
+function openNewIntervention(prefillTechId) {
+  const techOpts = USERS.filter(u=>u.role==='tecnico').map(u =>
+    `<option value="${u.id}" ${prefillTechId===u.id?'selected':''}>${u.name}</option>`).join('');
+  const siteOpts = state.data.sites.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  const specOpts = Object.entries(SPECIALIZATIONS).map(([k,v]) => `<option value="${k}">${v}</option>`).join('');
+  const statusOpts = Object.entries(STATUS_LABELS).map(([k,v]) => `<option value="${k}">${v}</option>`).join('');
+
+  openModal('Nuovo intervento', `
+    <div class="form-group"><label>Titolo</label><input id="i-title" class="form-control" placeholder="es. Revisione compressore"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Sito</label><select id="i-site" class="form-control">${siteOpts}</select></div>
+      <div class="form-group"><label>Tecnico</label><select id="i-tech" class="form-control">${techOpts}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Data</label><input id="i-date" type="date" class="form-control" value="${today()}"></div>
+      <div class="form-group"><label>Ora inizio</label><input id="i-time" type="time" class="form-control" value="08:00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Durata (ore)</label><input id="i-dur" type="number" class="form-control" value="1" min="0.5" step="0.5"></div>
+      <div class="form-group"><label>Specializzazione</label><select id="i-spec" class="form-control">${specOpts}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Stato</label><select id="i-status" class="form-control">${statusOpts}</select></div>
+    </div>
+    <div class="form-group"><label>Note</label><textarea id="i-notes" class="form-control" placeholder="Informazioni aggiuntive…"></textarea></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Annulla</button>
+     <button class="btn btn-primary" onclick="saveNewIntervention()">Salva</button>`
+  );
+}
+
+function saveNewIntervention() {
+  const title = document.getElementById('i-title').value.trim();
+  if (!title) { toast('Inserisci un titolo'); return; }
+  const newI = {
+    id: uid(), title,
+    siteId: document.getElementById('i-site').value,
+    techId: document.getElementById('i-tech').value,
+    date: document.getElementById('i-date').value,
+    time: document.getElementById('i-time').value,
+    duration: parseFloat(document.getElementById('i-dur').value)||1,
+    spec: document.getElementById('i-spec').value,
+    status: document.getElementById('i-status').value,
+    notes: document.getElementById('i-notes').value.trim(),
+  };
+  state.data.interventions.push(newI);
+  saveData();
+  closeModal();
+  toast('Intervento creato');
+  navigate(state.page);
+  buildUI(); // update badges
+}
+
+function openEditIntervention(id) {
+  const i = getIntervention(id);
+  if (!i) return;
+  const techOpts = USERS.filter(u=>u.role==='tecnico').map(u =>
+    `<option value="${u.id}" ${i.techId===u.id?'selected':''}>${u.name}</option>`).join('');
+  const siteOpts = state.data.sites.map(s => `<option value="${s.id}" ${i.siteId===s.id?'selected':''}>${s.name}</option>`).join('');
+  const specOpts = Object.entries(SPECIALIZATIONS).map(([k,v]) => `<option value="${k}" ${i.spec===k?'selected':''}>${v}</option>`).join('');
+  const statusOpts = Object.entries(STATUS_LABELS).map(([k,v]) => `<option value="${k}" ${i.status===k?'selected':''}>${v}</option>`).join('');
+
+  openModal('Modifica intervento', `
+    <div class="form-group"><label>Titolo</label><input id="i-title" class="form-control" value="${i.title}"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Sito</label><select id="i-site" class="form-control">${siteOpts}</select></div>
+      <div class="form-group"><label>Tecnico</label><select id="i-tech" class="form-control">${techOpts}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Data</label><input id="i-date" type="date" class="form-control" value="${i.date}"></div>
+      <div class="form-group"><label>Ora inizio</label><input id="i-time" type="time" class="form-control" value="${i.time}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Durata (ore)</label><input id="i-dur" type="number" class="form-control" value="${i.duration}" min="0.5" step="0.5"></div>
+      <div class="form-group"><label>Specializzazione</label><select id="i-spec" class="form-control">${specOpts}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Stato</label><select id="i-status" class="form-control">${statusOpts}</select></div>
+    </div>
+    <div class="form-group"><label>Note</label><textarea id="i-notes" class="form-control">${i.notes}</textarea></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Annulla</button>
+     <button class="btn btn-primary" onclick="saveEditIntervention('${id}')">Salva</button>`
+  );
+}
+
+function saveEditIntervention(id) {
+  const i = getIntervention(id);
+  if (!i) return;
+  const title = document.getElementById('i-title').value.trim();
+  if (!title) { toast('Inserisci un titolo'); return; }
+  i.title = title;
+  i.siteId = document.getElementById('i-site').value;
+  i.techId = document.getElementById('i-tech').value;
+  i.date = document.getElementById('i-date').value;
+  i.time = document.getElementById('i-time').value;
+  i.duration = parseFloat(document.getElementById('i-dur').value)||1;
+  i.spec = document.getElementById('i-spec').value;
+  i.status = document.getElementById('i-status').value;
+  i.notes = document.getElementById('i-notes').value.trim();
+  saveData();
+  closeModal();
+  toast('Intervento aggiornato');
+  navigate(state.page);
+}
+
+function deleteIntervention(id) {
+  if (!confirm('Eliminare questo intervento?')) return;
+  state.data.interventions = state.data.interventions.filter(i => i.id !== id);
+  saveData();
+  toast('Intervento eliminato');
+  navigate(state.page);
+}
+
+// ──────────────────────────────────────────────────────────────
+// TECNICI
+// ──────────────────────────────────────────────────────────────
+function renderTecnici() {
+  const technicians = USERS.filter(u => u.role === 'tecnico');
+  const d = state.data;
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">Tecnici</div><div class="page-subtitle">${technicians.length} tecnici registrati</div></div>
+    </div>
+    <div class="page-body">
+      <div class="grid-2">
+        ${technicians.map(u => {
+          const myInts = d.interventions.filter(i => i.techId === u.id);
+          const openInts = myInts.filter(i => i.status !== 'done');
+          const doneInts = myInts.filter(i => i.status === 'done');
+          return `<div class="card">
+            <div class="card-header">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="avatar ${u.avatarClass}" style="width:36px;height:36px;font-size:13px">${u.initials}</div>
+                <div>
+                  <div style="font-weight:700;font-size:14px">${u.name}</div>
+                  <div style="font-size:11px;color:var(--fg-3)">${SPECIALIZATIONS[u.spec]||'Generico'}</div>
+                </div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="state.weekOffset=0;renderAgenda('${u.id}');document.getElementById('nav-agenda')?.classList.add('active')">Agenda</button>
+            </div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center">
+                <div><div style="font-size:22px;font-weight:700;letter-spacing:-1px">${myInts.length}</div><div style="font-size:11px;color:var(--fg-3)">Totale</div></div>
+                <div><div style="font-size:22px;font-weight:700;letter-spacing:-1px;color:var(--warn)">${openInts.length}</div><div style="font-size:11px;color:var(--fg-3)">Aperti</div></div>
+                <div><div style="font-size:22px;font-weight:700;letter-spacing:-1px;color:var(--ok)">${doneInts.length}</div><div style="font-size:11px;color:var(--fg-3)">Completati</div></div>
+              </div>
+              <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+                <button class="btn btn-primary" style="width:100%" onclick="openNewIntervention('${u.id}')">+ Nuovo intervento</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ──────────────────────────────────────────────────────────────
+// SITI
+// ──────────────────────────────────────────────────────────────
+function renderSiti() {
+  const d = state.data;
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">Siti</div><div class="page-subtitle">${d.sites.length} siti registrati</div></div>
+      <button class="btn btn-primary" onclick="openNewSite()">+ Nuovo sito</button>
+    </div>
+    <div class="page-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nome</th><th>Indirizzo</th><th>Referente</th><th>Interventi</th><th></th></tr></thead>
+          <tbody>
+            ${d.sites.map(s => {
+              const siteInts = d.interventions.filter(i => i.siteId === s.id);
+              return `<tr>
+                <td style="color:var(--fg);font-weight:500">${s.name}</td>
+                <td>${s.address}</td>
+                <td>${s.contact}</td>
+                <td><span style="font-family:'IBM Plex Mono',monospace">${siteInts.length}</span></td>
+                <td><div style="display:flex;gap:4px">
+                  <button class="btn btn-ghost btn-sm" onclick="openEditSite('${s.id}')">Modifica</button>
+                  <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="deleteSite('${s.id}')">✕</button>
+                </div></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function openNewSite() {
+  openModal('Nuovo sito', `
+    <div class="form-group"><label>Nome</label><input id="s-name" class="form-control" placeholder="es. Stabilimento Rossi SpA"></div>
+    <div class="form-group"><label>Indirizzo</label><input id="s-addr" class="form-control" placeholder="Via Roma 1, Milano"></div>
+    <div class="form-group"><label>Referente</label><input id="s-contact" class="form-control" placeholder="Ing. Rossi"></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Annulla</button>
+     <button class="btn btn-primary" onclick="saveNewSite()">Salva</button>`
+  );
+}
+function saveNewSite() {
+  const name = document.getElementById('s-name').value.trim();
+  if (!name) { toast('Inserisci un nome'); return; }
+  state.data.sites.push({ id: uid(), name, address: document.getElementById('s-addr').value.trim(), contact: document.getElementById('s-contact').value.trim() });
+  saveData(); closeModal(); toast('Sito aggiunto'); navigate('siti');
+}
+function openEditSite(id) {
+  const s = getSite(id);
+  if (!s) return;
+  openModal('Modifica sito', `
+    <div class="form-group"><label>Nome</label><input id="s-name" class="form-control" value="${s.name}"></div>
+    <div class="form-group"><label>Indirizzo</label><input id="s-addr" class="form-control" value="${s.address}"></div>
+    <div class="form-group"><label>Referente</label><input id="s-contact" class="form-control" value="${s.contact}"></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Annulla</button>
+     <button class="btn btn-primary" onclick="saveEditSite('${id}')">Salva</button>`
+  );
+}
+function saveEditSite(id) {
+  const s = getSite(id);
+  if (!s) return;
+  s.name = document.getElementById('s-name').value.trim();
+  s.address = document.getElementById('s-addr').value.trim();
+  s.contact = document.getElementById('s-contact').value.trim();
+  saveData(); closeModal(); toast('Sito aggiornato'); navigate('siti');
+}
+function deleteSite(id) {
+  const hasInts = state.data.interventions.some(i => i.siteId === id);
+  if (hasInts) { toast('Impossibile: ci sono interventi associati'); return; }
+  if (!confirm('Eliminare questo sito?')) return;
+  state.data.sites = state.data.sites.filter(s => s.id !== id);
+  saveData(); toast('Sito eliminato'); navigate('siti');
+}
+
+// ──────────────────────────────────────────────────────────────
+// SEGNALAZIONI (ADMIN)
+// ──────────────────────────────────────────────────────────────
+function renderTickets() {
+  const d = state.data;
+  const sorted = [...d.tickets].sort((a,b) => {
+    if (a.status==='open' && b.status!=='open') return -1;
+    if (a.status!=='open' && b.status==='open') return 1;
+    return b.date.localeCompare(a.date);
+  });
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">Segnalazioni</div><div class="page-subtitle">${d.tickets.filter(t=>t.status==='open').length} aperte</div></div>
+    </div>
+    <div class="page-body">
+      ${sorted.length === 0
+        ? `<div class="empty-state">${iconCheck()}<p>Nessuna segnalazione ricevuta</p></div>`
+        : sorted.map(t => {
+            const tech = getUser(t.techId);
+            return `<div class="ticket-card">
+              <div class="ticket-dot ${t.status==='resolved'?'resolved':''}"></div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                  ${ticketBadge(t.status)}
+                  <span style="font-size:11px;color:var(--fg-3)">${tech?.name||t.techId} · ${fmt(t.date)}</span>
+                </div>
+                <div style="font-size:13px;color:var(--fg)">${t.text}</div>
+                ${t.adminNote ? `<div style="margin-top:6px;font-size:12px;color:var(--fg-2);background:var(--surface-2);padding:6px 8px;border-radius:5px"><strong>Risposta:</strong> ${t.adminNote}</div>` : ''}
+              </div>
+              <div class="ticket-actions">
+                ${t.status==='open'
+                  ? `<button class="btn btn-ghost btn-sm" onclick="replyTicket('${t.id}')">Rispondi</button>
+                     <button class="btn btn-primary btn-sm" onclick="resolveTicket('${t.id}')">Risolvi</button>`
+                  : `<button class="btn btn-ghost btn-sm" onclick="reopenTicket('${t.id}')">Riapri</button>`}
+              </div>
+            </div>`;
+          }).join('')
+      }
+    </div>`;
+}
+
+function replyTicket(id) {
+  const t = state.data.tickets.find(x=>x.id===id);
+  if(!t) return;
+  openModal('Rispondi alla segnalazione',
+    `<p style="color:var(--fg-2);font-size:13px;margin-bottom:12px">${t.text}</p>
+     <div class="form-group"><label>Nota di risposta</label><textarea id="t-note" class="form-control">${t.adminNote||''}</textarea></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Annulla</button>
+     <button class="btn btn-primary" onclick="saveReplyTicket('${id}')">Salva risposta</button>`
+  );
+}
+function saveReplyTicket(id) {
+  const t = state.data.tickets.find(x=>x.id===id);
+  if(!t) return;
+  t.adminNote = document.getElementById('t-note').value.trim();
+  saveData(); closeModal(); toast('Risposta salvata'); navigate('tickets');
+}
+function resolveTicket(id) {
+  const t = state.data.tickets.find(x=>x.id===id);
+  if(!t) return;
+  if(!t.adminNote) { openModal('Risolvi segnalazione',
+    `<div class="form-group"><label>Nota (facoltativa)</label><textarea id="t-note" class="form-control" placeholder="Come è stata risolta?"></textarea></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Annulla</button>
+     <button class="btn btn-primary" onclick="doResolveTicket('${id}')">Segna come risolta</button>`
+  ); return; }
+  t.status = 'resolved'; saveData(); toast('Segnalazione risolta'); navigate('tickets'); buildUI();
+}
+function doResolveTicket(id) {
+  const t = state.data.tickets.find(x=>x.id===id);
+  if(!t) return;
+  t.adminNote = document.getElementById('t-note').value.trim();
+  t.status = 'resolved';
+  saveData(); closeModal(); toast('Segnalazione risolta'); navigate('tickets'); buildUI();
+}
+function reopenTicket(id) {
+  const t = state.data.tickets.find(x=>x.id===id);
+  if(!t) return;
+  t.status='open'; saveData(); toast('Segnalazione riaperta'); navigate('tickets'); buildUI();
+}
+
+// ──────────────────────────────────────────────────────────────
+// VISTA TECNICO — LA MIA AGENDA
+// ──────────────────────────────────────────────────────────────
+function renderMyAgenda() {
+  const u = state.user;
+  const d = state.data;
+  const todayStr = today();
+  const myInts = d.interventions
+    .filter(i => i.techId === u.id)
+    .sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+  const upcoming = myInts.filter(i => i.date >= todayStr && i.status !== 'done');
+  const past = myInts.filter(i => i.date < todayStr || i.status === 'done');
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">La Mia Agenda</div>
+        <div class="page-subtitle">${upcoming.length} interventi in programma</div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div style="margin-bottom:24px">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-3);margin-bottom:12px">In programma</div>
+        ${upcoming.length === 0
+          ? `<div class="empty-state">${iconCal()}<p>Nessun intervento in programma</p></div>`
+          : upcoming.map(i => renderMyCard(i)).join('')}
+      </div>
+      ${past.length>0 ? `
+        <div>
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-3);margin-bottom:12px">Storico</div>
+          ${past.map(i => renderMyCard(i, true)).join('')}
+        </div>` : ''}
+    </div>`;
+}
+
+function renderMyCard(i, isPast) {
+  const site = getSite(i.siteId);
+  return `<div class="card" style="margin-bottom:10px;${isPast?'opacity:.65':''}">
+    <div class="card-body" style="display:flex;gap:14px;align-items:flex-start">
+      <div style="text-align:center;min-width:52px;flex-shrink:0;background:var(--surface-2);border-radius:6px;padding:8px 6px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-3)">${new Date(i.date+'T12:00:00').toLocaleDateString('it-IT',{month:'short'})}</div>
+        <div style="font-size:22px;font-weight:700;line-height:1;letter-spacing:-1px">${new Date(i.date+'T12:00:00').getDate()}</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:14px;margin-bottom:4px">${i.title}</div>
+        <div style="color:var(--fg-2);font-size:12px;margin-bottom:6px">${site?.name||'—'} · ${site?.address||''}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--fg-3)">⏱ ${i.time} · ${i.duration}h</span>
+          ${specBadge(i.spec)}
+          ${statusBadge(i.status)}
+        </div>
+        ${i.notes ? `<div style="margin-top:8px;font-size:12px;color:var(--fg-2);background:var(--surface-2);padding:6px 8px;border-radius:5px">${i.notes}</div>` : ''}
+      </div>
+      ${!isPast ? `<div style="flex-shrink:0">
+        <select class="form-control" style="width:auto;font-size:12px" onchange="quickUpdateStatus('${i.id}', this.value)">
+          ${Object.entries(STATUS_LABELS).map(([k,v]) => `<option value="${k}" ${i.status===k?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </div>` : ''}
+    </div>
+  </div>`;
+}
+
+function quickUpdateStatus(id, val) {
+  const i = getIntervention(id);
+  if (!i) return;
+  i.status = val;
+  saveData();
+  toast('Stato aggiornato');
+  navigate(state.page);
+}
+
+// ──────────────────────────────────────────────────────────────
+// VISTA TECNICO — INVIA SEGNALAZIONE
+// ──────────────────────────────────────────────────────────────
+function renderMyTicket() {
+  const u = state.user;
+  const myTickets = state.data.tickets
+    .filter(t => t.techId === u.id)
+    .sort((a,b) => b.date.localeCompare(a.date));
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="page-header">
+      <div><div class="page-title">Segnalazioni</div><div class="page-subtitle">Invia e monitora le tue segnalazioni</div></div>
+    </div>
+    <div class="page-body">
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-header"><span class="card-title">Nuova segnalazione</span></div>
+        <div class="card-body">
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Descrivi il problema</label>
+            <textarea id="ticket-text" class="form-control" rows="4" placeholder="Descrivi il problema riscontrato durante l'intervento…"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="sendTicket()">Invia segnalazione</button>
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-3);margin-bottom:12px">Le mie segnalazioni</div>
+      ${myTickets.length === 0
+        ? `<div class="empty-state">${iconCheck()}<p>Nessuna segnalazione inviata</p></div>`
+        : myTickets.map(t => `
+            <div class="ticket-card">
+              <div class="ticket-dot ${t.status==='resolved'?'resolved':''}"></div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                  ${ticketBadge(t.status)}
+                  <span style="font-size:11px;color:var(--fg-3)">${fmt(t.date)}</span>
+                </div>
+                <div style="font-size:13px;color:var(--fg)">${t.text}</div>
+                ${t.adminNote ? `<div style="margin-top:6px;font-size:12px;color:var(--fg-2);background:var(--surface-2);padding:6px 8px;border-radius:5px"><strong>Risposta admin:</strong> ${t.adminNote}</div>` : ''}
+              </div>
+            </div>`).join('')
+      }
+    </div>`;
+}
+
+function sendTicket() {
+  const text = document.getElementById('ticket-text').value.trim();
+  if (!text) { toast('Scrivi una descrizione'); return; }
+  state.data.tickets.push({ id: uid(), techId: state.user.id, text, date: today(), status: 'open', adminNote: '' });
+  saveData();
+  toast('Segnalazione inviata');
+  navigate('myticket');
+  buildUI();
+}
+
+// ──────────────────────────────────────────────────────────────
+// CHAT
+// ──────────────────────────────────────────────────────────────
+
+// Ritorna (o crea) un oggetto chat dato il chatId
+function getOrCreateChat(chatId) {
+  let chat = state.data.chats.find(c => c.id === chatId);
+  if (!chat) {
+    chat = { id: chatId, messages: [] };
+    state.data.chats.push(chat);
+  }
+  return chat;
+}
+
+// Conta messaggi non letti destinati a userId
+function countUnread(userId) {
+  let count = 0;
+  state.data.chats.forEach(chat => {
+    chat.messages.forEach(m => {
+      if (m.to === userId && !m.read) count++;
+    });
+  });
+  return count;
+}
+
+// Marca come letti i messaggi indirizzati a userId in una chat
+function markChatRead(chatId, userId) {
+  const chat = state.data.chats.find(c => c.id === chatId);
+  if (!chat) return;
+  let changed = false;
+  chat.messages.forEach(m => {
+    if (m.to === userId && !m.read) { m.read = true; changed = true; }
+  });
+  if (changed) saveData();
+}
+
+// Formatta timestamp per visualizzazione nella chat
+function fmtChatTime(isoStr) {
+  const d = new Date(isoStr);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  if (isToday) return d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }) + ' ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+}
+
+function fmtChatDate(isoStr) {
+  const d = new Date(isoStr);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const yesterday = new Date(now); yesterday.setDate(now.getDate()-1);
+  if (isToday) return 'Oggi';
+  if (d.toDateString() === yesterday.toDateString()) return 'Ieri';
+  return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+// Invia un messaggio nella chat
+function sendChatMessage(chatId, fromId, toId) {
+  const inputEl = document.getElementById('chat-input-' + chatId);
+  if (!inputEl) return;
+  const text = inputEl.value.trim();
+  if (!text) return;
+  const chat = getOrCreateChat(chatId);
+  chat.messages.push({
+    id: uid(),
+    from: fromId,
+    to: toId,
+    text,
+    ts: new Date().toISOString(),
+    read: false,
+  });
+  saveData();
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+  renderChatMessages(chatId, fromId);
+  buildUI(); // aggiorna badge
+}
+
+// Render messaggi dentro la finestra chat
+function renderChatMessages(chatId, currentUserId) {
+  const chat = state.data.chats.find(c => c.id === chatId);
+  const msgs = chat ? chat.messages : [];
+  const container = document.getElementById('chat-msgs-' + chatId);
+  if (!container) return;
+
+  let lastDate = '';
+  let html = '';
+  msgs.forEach(m => {
+    const msgDate = fmtChatDate(m.ts);
+    if (msgDate !== lastDate) {
+      html += `<div class="chat-date-sep">${msgDate}</div>`;
+      lastDate = msgDate;
+    }
+    const isMe = m.from === currentUserId;
+    const sender = getUser(m.from);
+    html += `<div class="chat-bubble-wrap ${isMe ? 'me' : 'other'}">
+      ${!isMe ? `<div class="chat-sender">${sender?.name||m.from}</div>` : ''}
+      <div class="chat-bubble">${escHtml(m.text)}</div>
+      <div class="chat-meta">${fmtChatTime(m.ts)}</div>
+    </div>`;
+  });
+
+  if (!html) {
+    html = `<div class="chat-empty">
+      ${iconChat()}
+      <p style="font-size:13px">Nessun messaggio ancora.<br>Inizia la conversazione!</p>
+    </div>`;
+  }
+
+  container.innerHTML = html;
+  container.scrollTop = container.scrollHeight;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ADMIN: chat con lista tecnici a sinistra
+function renderChat(showConversation) {
+  const technicians = USERS.filter(u => u.role === 'tecnico');
+  // showConversation=true forza la visualizzazione della finestra su mobile
+  const isMobileConv = showConversation === true;
+
+  const activeTechId = state.activeChatTechId;
+  const activeChatId = activeTechId ? 'admin_' + activeTechId : null;
+
+  if (activeChatId && isMobileConv) markChatRead(activeChatId, 'admin');
+
+  const mainContent = document.getElementById('main-content');
+  mainContent.classList.add('chat-mode');
+
+  // Lista tecnici
+  const listHtml = technicians.map(u => {
+    const chatId = 'admin_' + u.id;
+    const unread = (state.data.chats.find(c => c.id === chatId)?.messages || [])
+      .filter(m => m.to === 'admin' && !m.read).length;
+    const lastMsg = [...(state.data.chats.find(c => c.id === chatId)?.messages || [])].pop();
+    const preview = lastMsg ? escHtml(lastMsg.text.slice(0,30) + (lastMsg.text.length>30?'…':'')) : 'Nessun messaggio';
+    return `<div class="chat-list-item ${u.id === activeTechId ? 'active' : ''}" onclick="openAdminChat('${u.id}')">
+      <div class="avatar ${u.avatarClass}" style="width:32px;height:32px;font-size:11px;flex-shrink:0">${u.initials}</div>
+      <div style="flex:1;min-width:0">
+        <div class="chat-list-item-name">${u.name}</div>
+        <div class="chat-list-item-sub">${preview}</div>
+      </div>
+      ${unread > 0 ? `<span class="chat-unread">${unread}</span>` : ''}
+    </div>`;
+  }).join('');
+
+  // Finestra conversazione
+  let windowHtml = '';
+  if (activeTechId) {
+    const activeTech = getUser(activeTechId);
+    windowHtml = `
+      <div class="chat-window-header">
+        <button class="chat-back-btn" onclick="renderChat(false)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Indietro
+        </button>
+        <div class="avatar ${activeTech?.avatarClass||''}" style="width:32px;height:32px;font-size:11px">${activeTech?.initials||'?'}</div>
+        <div>
+          <div class="chat-window-name">${activeTech?.name||activeTechId}</div>
+          <div class="chat-window-sub">${SPECIALIZATIONS[activeTech?.spec]||'Tecnico'}</div>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-msgs-${activeChatId}"></div>
+      <div class="chat-input-bar">
+        <textarea class="chat-input" id="chat-input-${activeChatId}" rows="1"
+          placeholder="Scrivi un messaggio…"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage('${activeChatId}','admin','${activeTechId}')}"
+        ></textarea>
+        <button class="chat-send-btn" onclick="sendChatMessage('${activeChatId}','admin','${activeTechId}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>`;
+  } else {
+    windowHtml = `<div class="chat-empty">${iconChat()}<p style="font-size:13px">Seleziona un tecnico per iniziare</p></div>`;
+  }
+
+  // Su mobile: o lista o conversazione, mai entrambe
+  const listClass   = isMobileConv ? 'chat-list mobile-hidden'   : 'chat-list';
+  const windowClass = isMobileConv ? 'chat-window' : (activeTechId ? 'chat-window mobile-hidden' : 'chat-window mobile-hidden');
+
+  mainContent.innerHTML = `
+    <div class="page-header" style="flex-shrink:0">
+      <div><div class="page-title">Chat</div><div class="page-subtitle">Messaggi diretti con i tecnici</div></div>
+    </div>
+    <div class="chat-layout">
+      <div class="${listClass}">
+        <div class="chat-list-header">Tecnici</div>
+        ${listHtml}
+      </div>
+      <div class="${windowClass}">${windowHtml}</div>
+    </div>`;
+
+  if (activeChatId && isMobileConv) renderChatMessages(activeChatId, 'admin');
+  // Su desktop renderizza sempre
+  if (activeChatId && !isMobileConv) {
+    // Controlla se siamo su desktop (chat-window non è hidden)
+    const win = mainContent.querySelector('.chat-window');
+    if (win && !win.classList.contains('mobile-hidden')) {
+      markChatRead(activeChatId, 'admin');
+      renderChatMessages(activeChatId, 'admin');
+      buildUI();
+    }
+  }
+}
+
+function openAdminChat(techId) {
+  state.activeChatTechId = techId;
+  renderChat(true); // su mobile apre direttamente la conversazione
+  buildUI();
+}
+
+// TECNICO: chat diretta con l'admin
+function renderMyChat() {
+  const u = state.user;
+  const chatId = 'admin_' + u.id;
+
+  markChatRead(chatId, u.id);
+  buildUI();
+
+  const admin = getUser('admin');
+  const mainContent = document.getElementById('main-content');
+  mainContent.classList.add('chat-mode');
+
+  mainContent.innerHTML = `
+    <div class="page-header" style="flex-shrink:0">
+      <div><div class="page-title">Chat con Admin</div><div class="page-subtitle">Comunicazione diretta con ${admin?.name||'Admin'}</div></div>
+    </div>
+    <div class="chat-layout">
+      <div class="chat-window" style="display:flex;flex-direction:column;height:100%">
+        <div class="chat-window-header">
+          <div class="avatar avatar-admin" style="width:32px;height:32px;font-size:11px">${admin?.initials||'AD'}</div>
+          <div>
+            <div class="chat-window-name">${admin?.name||'Admin'}</div>
+            <div class="chat-window-sub">Amministratore</div>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-msgs-${chatId}"></div>
+        <div class="chat-input-bar">
+          <textarea class="chat-input" id="chat-input-${chatId}" rows="1"
+            placeholder="Scrivi un messaggio…"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage('${chatId}','${u.id}','admin')}"
+          ></textarea>
+          <button class="chat-send-btn" onclick="sendChatMessage('${chatId}','${u.id}','admin')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  renderChatMessages(chatId, u.id);
+}
+
+// ──────────────────────────────────────────────────────────────
+// ICONS (inline SVG helpers)
+// ──────────────────────────────────────────────────────────────
+const icon = (path, extra='') =>
+  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${path}</svg>`;
+
+function iconHome()   { return icon('<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'); }
+function iconCal()    { return icon('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'); }
+function iconWrench() { return icon('<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>'); }
+function iconUser()   { return icon('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'); }
+function iconPin()    { return icon('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'); }
+function iconAlert()  { return icon('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'); }
+function iconCheck()  { return icon('<polyline points="20 6 9 17 4 12"/>', 'style="width:32px;height:32px"'); }
+function iconChat()   { return icon('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'); }
+</script>

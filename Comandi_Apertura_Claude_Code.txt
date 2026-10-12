@@ -1,0 +1,2 @@
+cd C:\Users\aless\Desktop\Lavori_Claude_Terminale\Progetto_tecnoservice_hub
+claude --model claude-sonnet-4-6
